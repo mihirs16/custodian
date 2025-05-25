@@ -13,7 +13,8 @@ func main() {
 
 	// bootstrap dependencies
 	env := &internal.Env{
-		TypeDef: models.TypeDefinitionModel{DB: db},
+		CatalogueModel: models.CatalogueModel{DB: db},
+		EntityModel:    models.EntityModel{DB: db},
 	}
 
 	// spawn server

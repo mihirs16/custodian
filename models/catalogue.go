@@ -8,21 +8,27 @@ import (
 )
 
 type FieldDefinition struct {
-	Type     string `json:"type"`
-	Field    string `json:"field"`
-	DataType string `json:"data_type"`
-	Optional bool   `json:"optional"`
+	Type      string `json:"type"`
+	Field     string `json:"field"`
+	DataType  string `json:"data_type"`
+	Optional  bool   `json:"optional"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type TypeDefinition = []FieldDefinition
 
-type TypeDefinitionModel struct {
+type CatalogueModel struct {
 	DB *pgxpool.Pool
 }
 
-func (t TypeDefinitionModel) FetchType(typeName string) (TypeDefinition, error) {
+func (c CatalogueModel) FetchType(typeName string) (TypeDefinition, error) {
 	var typeDefinition TypeDefinition
-	rows, err := t.DB.Query(context.Background(), "SELECT * FROM field_definitions WHERE type = $1", typeName)
+	rows, err := c.DB.Query(
+		context.Background(),
+		"SELECT field, type, data_type, optional FROM catalogue WHERE type = $1",
+		typeName,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -40,10 +46,10 @@ func (t TypeDefinitionModel) FetchType(typeName string) (TypeDefinition, error) 
 	return typeDefinition, nil
 }
 
-func (t TypeDefinitionModel) CreateField(field FieldDefinition) error {
-	_, err := t.DB.Exec(
+func (c CatalogueModel) CreateField(field FieldDefinition) error {
+	_, err := c.DB.Exec(
 		context.Background(),
-		"INSERT INTO field_definitions (field, type, data_type, optional) VALUES (@field, @type, @data_type, @optional)",
+		"INSERT INTO catalogue (field, type, data_type, optional) VALUES (@field, @type, @data_type, @optional)",
 		pgx.NamedArgs{
 			"field":     field.Field,
 			"type":      field.Type,

@@ -7,7 +7,7 @@ import (
 	"github.com/mihirs16/custodian/models"
 )
 
-func MakeTypeDefHandler(t *models.TypeDefinitionModel) http.Handler {
+func MakeCatalogueHandler(t *models.CatalogueModel) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {

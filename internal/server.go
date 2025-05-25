@@ -8,12 +8,14 @@ import (
 )
 
 type Env struct {
-	TypeDef models.TypeDefinitionModel
+	CatalogueModel models.CatalogueModel
+	EntityModel    models.EntityModel
 }
 
 func SpawnServer(env *Env) http.Handler {
 	mux := http.NewServeMux()
-	mux.Handle("/types", handlers.MakeTypeDefHandler(&env.TypeDef))
+	mux.Handle("/catalogue", handlers.MakeCatalogueHandler(&env.CatalogueModel))
+	mux.Handle("/entities", handlers.MakeEntitiesHandler(&env.EntityModel))
 	var httpHandler http.Handler = mux
 	return httpHandler
 }
