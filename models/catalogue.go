@@ -31,9 +31,9 @@ type CatalogueModel struct {
 
 var KindDataTypeMapping = map[string]string{
 	"text":    "string",
-	"integer": "int",
+	"number":  "float64",
 	"boolean": "bool",
-	"array":   "array",
+	"array":   "slice",
 }
 
 func (c CatalogueModel) FetchType(typeName string) (TypeDefinition, error) {
