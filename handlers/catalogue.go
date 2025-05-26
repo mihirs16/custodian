@@ -34,7 +34,7 @@ func MakeCatalogueHandler(t *models.CatalogueModel) http.Handler {
 			}
 
 			if r.Method == http.MethodPost {
-				var field models.FieldDefinition
+				var field models.FieldDefinitionOpts
 				err := json.NewDecoder(r.Body).Decode(&field)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusBadRequest)
@@ -42,7 +42,13 @@ func MakeCatalogueHandler(t *models.CatalogueModel) http.Handler {
 
 				err = t.CreateField(field)
 				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
+					switch err.(type) {
+					case *models.FieldDataTypeError:
+						http.Error(w, err.Error(), http.StatusBadRequest)
+					default:
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+					}
+					return
 				}
 
 				w.Write([]byte("Field created succesfully"))

@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS catalogue (
     "type" TEXT,
     data_type TEXT NOT NULL,
     optional BOOLEAN DEFAULT false,
-	created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-	updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (field, "type")
 );
 COMMENT ON COLUMN catalogue.field IS 'Field name unique to the type';

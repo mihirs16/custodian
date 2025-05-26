@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,17 +17,31 @@ type FieldDefinition struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-type TypeDefinition = []FieldDefinition
+type FieldDefinitionOpts struct {
+	Type     string `json:"type"`
+	Field    string `json:"field"`
+	DataType string `json:"data_type"`
+	Optional bool   `json:"optional"`
+}
+
+type TypeDefinition = map[string]FieldDefinition
 
 type CatalogueModel struct {
 	DB *pgxpool.Pool
 }
 
+var KindDataTypeMapping = map[string]reflect.Kind{
+	"text":    reflect.String,
+	"integer": reflect.Int,
+	"boolean": reflect.Bool,
+	"array":   reflect.Array,
+}
+
 func (c CatalogueModel) FetchType(typeName string) (TypeDefinition, error) {
-	var typeDefinition TypeDefinition
+	var typeDefinition = make(TypeDefinition)
 	rows, err := c.DB.Query(
 		context.Background(),
-		"SELECT field, type, data_type, optional FROM catalogue WHERE type = $1",
+		"SELECT field, type, data_type, optional, created_at::text, updated_at::text FROM catalogue WHERE type = $1",
 		typeName,
 	)
 	if err != nil {
@@ -36,25 +51,37 @@ func (c CatalogueModel) FetchType(typeName string) (TypeDefinition, error) {
 
 	for rows.Next() {
 		var field FieldDefinition
-		err = rows.Scan(&field.Field, &field.Type, &field.DataType, &field.Optional)
+		err = rows.Scan(
+			&field.Field,
+			&field.Type,
+			&field.DataType,
+			&field.Optional,
+			&field.CreatedAt,
+			&field.UpdatedAt,
+		)
 		if err != nil {
 			return nil, err
 		}
-		typeDefinition = append(typeDefinition, field)
+		typeDefinition[field.Field] = field
 	}
 
 	return typeDefinition, nil
 }
 
-func (c CatalogueModel) CreateField(field FieldDefinition) error {
+func (c CatalogueModel) CreateField(fieldOpts FieldDefinitionOpts) error {
+	_, dataTypeMappingExists := KindDataTypeMapping[fieldOpts.DataType]
+	if !dataTypeMappingExists {
+		return &FieldDataTypeError{fieldOpts}
+	}
+
 	_, err := c.DB.Exec(
 		context.Background(),
 		"INSERT INTO catalogue (field, type, data_type, optional) VALUES (@field, @type, @data_type, @optional)",
 		pgx.NamedArgs{
-			"field":     field.Field,
-			"type":      field.Type,
-			"data_type": field.DataType,
-			"optional":  field.Optional,
+			"field":     fieldOpts.Field,
+			"type":      fieldOpts.Type,
+			"data_type": fieldOpts.DataType,
+			"optional":  fieldOpts.Optional,
 		},
 	)
 	if err != nil {

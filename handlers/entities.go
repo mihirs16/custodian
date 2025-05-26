@@ -22,13 +22,11 @@ func MakeEntitiesHandler(c *models.EntityModel) http.Handler {
 				entity, err := c.FetchEntity(Entity)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
 				}
 
 				err = json.NewEncoder(w).Encode(&entity)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
 				}
 
 				return
@@ -39,15 +37,25 @@ func MakeEntitiesHandler(c *models.EntityModel) http.Handler {
 				err := json.NewDecoder(r.Body).Decode(&entityOpts)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
 				}
 
 				entityId, err := c.CreateEntity(entityOpts)
 				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
+					switch err.(type) {
+					case *models.EntityUnexpectedFieldError,
+						*models.EntityMissingFieldError,
+						*models.EntityMissingTypeError,
+						*models.EntityMismatchTypeError:
+						http.Error(w, err.Error(), http.StatusBadRequest)
+					default:
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+					}
+
+					return
 				}
 
 				fmt.Fprintf(w, "Entity %s created succesfully", entityId)
-				return
 			}
 
 			w.WriteHeader(http.StatusBadRequest)
