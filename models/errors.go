@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"reflect"
 )
 
 type FieldDataTypeError struct {
@@ -35,12 +34,12 @@ func (e *EntityMissingFieldError) Error() string {
 type EntityMismatchTypeError struct {
 	fieldKey      string
 	fieldDataType string
-	kindOfValue   reflect.Kind
+	kindOfValue   string
 }
 
 func (e *EntityMismatchTypeError) Error() string {
 	return fmt.Sprintf(
-		"%s expected a `%s` value but got `%s`; ",
+		"`%s` expected a `%s` value but got `%s`; ",
 		e.fieldKey,
 		e.fieldDataType,
 		e.kindOfValue,

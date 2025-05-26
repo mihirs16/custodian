@@ -110,11 +110,11 @@ func (e EntityModel) validateEntityProps(entityOpts EntityOptions) error {
 			return &EntityUnexpectedFieldError{k}
 		}
 
-		kindOfValue := reflect.TypeOf(v).Kind()
+		kindOfValue := reflect.TypeOf(v)
 		kindExpected := KindDataTypeMapping[field.DataType]
 
-		if kindOfValue != kindExpected {
-			return &EntityMismatchTypeError{k, field.DataType, kindOfValue}
+		if kindOfValue.String() != kindExpected {
+			return &EntityMismatchTypeError{k, field.DataType, kindOfValue.String()}
 		}
 	}
 

@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"reflect"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -30,11 +29,11 @@ type CatalogueModel struct {
 	DB *pgxpool.Pool
 }
 
-var KindDataTypeMapping = map[string]reflect.Kind{
-	"text":    reflect.String,
-	"integer": reflect.Int,
-	"boolean": reflect.Bool,
-	"array":   reflect.Array,
+var KindDataTypeMapping = map[string]string{
+	"text":    "string",
+	"integer": "int",
+	"boolean": "bool",
+	"array":   "array",
 }
 
 func (c CatalogueModel) FetchType(typeName string) (TypeDefinition, error) {
